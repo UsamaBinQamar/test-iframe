@@ -14,7 +14,7 @@ export default function TutorChatbotPage() {
   >([
     {
       id: 1,
-      text: "Hey there! I'm here to guide you through ParlayProz—your go-to for data-driven sports betting insights. What would you like to know?",
+      text: "Hi! Ready to make smarter sports bets? Ask me about ParlayProz scanner, membership, or affiliate earnings!",
       isBot: true,
     },
   ]);
