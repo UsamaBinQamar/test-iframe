@@ -1,18 +1,28 @@
 // app/chatbot/page.js or pages/chatbot.js
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function TutorChatbotPage() {
   const [isOpen, setIsOpen] = useState(true); // Always start open in iframe mode
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hey there! I’m here to guide you through ParlayProz—your go-to for data-driven sports betting insights. What would you like to know?",
+      text: "Hey there! I'm here to guide you through ParlayProz—your go-to for data-driven sports betting insights. What would you like to know?",
       isBot: true,
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Ref for messages container
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   // Send message to parent window when chat state changes
   useEffect(() => {
@@ -196,6 +206,8 @@ export default function TutorChatbotPage() {
             </div>
           </div>
         ))}
+        {/* Dummy div for scroll-to-bottom */}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
