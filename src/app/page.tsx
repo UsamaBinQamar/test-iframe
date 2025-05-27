@@ -4,7 +4,14 @@ import { useState, useEffect, useRef } from "react";
 
 export default function TutorChatbotPage() {
   const [isOpen, setIsOpen] = useState(true); // Always start open in iframe mode
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<
+    {
+      id: number;
+      text: string;
+      isBot: boolean;
+      isTyping?: boolean;
+    }[]
+  >([
     {
       id: 1,
       text: "Hey there! I'm here to guide you through ParlayProz—your go-to for data-driven sports betting insights. What would you like to know?",
@@ -200,9 +207,52 @@ export default function TutorChatbotPage() {
                 msg.isBot
                   ? "bg-white border border-gray-200 text-gray-800"
                   : "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
-              }`}
+              } flex items-center`}
             >
-              <div className="whitespace-pre-wrap">{msg.text}</div>
+              {msg.isBot && msg.isTyping ? (
+                <>
+                  {/* Bot avatar */}
+                  <div className="mr-2 flex-shrink-0">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="28"
+                      height="28"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#7c3aed"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="bg-gradient-to-r from-purple-400 to-blue-400 rounded-full p-1 shadow"
+                    >
+                      <circle cx="12" cy="12" r="10" fill="#ede9fe" />
+                      <circle cx="12" cy="10" r="4" fill="#a5b4fc" />
+                      <rect
+                        x="9"
+                        y="16"
+                        width="6"
+                        height="2"
+                        rx="1"
+                        fill="#a5b4fc"
+                      />
+                    </svg>
+                  </div>
+                  {/* Animated typing dots */}
+                  <div className="flex items-center h-6">
+                    <span
+                      className="inline-block w-2 h-2 bg-purple-400 rounded-full animate-bounce mr-1"
+                      style={{ animationDelay: "-0.3s" }}
+                    ></span>
+                    <span
+                      className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-bounce mr-1"
+                      style={{ animationDelay: "-0.15s" }}
+                    ></span>
+                    <span className="inline-block w-2 h-2 bg-purple-400 rounded-full animate-bounce"></span>
+                  </div>
+                </>
+              ) : (
+                <div className="whitespace-pre-wrap">{msg.text}</div>
+              )}
             </div>
           </div>
         ))}
