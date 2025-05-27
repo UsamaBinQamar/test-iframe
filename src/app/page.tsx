@@ -2,12 +2,17 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export default function ChatbotPage() {
+export default function TutorChatbotPage() {
   const [isOpen, setIsOpen] = useState(true); // Always start open in iframe mode
   const [messages, setMessages] = useState([
-    { id: 1, text: "Hi! How can I help you today?", isBot: true },
+    {
+      id: 1,
+      text: "Hi! I'm your AI tutor. I'm here to help you learn! What subject would you like to study today?",
+      isBot: true,
+    },
   ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Send message to parent window when chat state changes
   useEffect(() => {
@@ -16,42 +21,76 @@ export default function ChatbotPage() {
     }
   }, [isOpen]);
 
-  const handleSendMessage = () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async () => {
+    if (!input.trim() || isLoading) return;
 
+    const userInput = input;
     // Add user message
-    const userMessage = { id: Date.now(), text: input, isBot: false };
-    setMessages([...messages, userMessage]);
+    const userMessage = { id: Date.now(), text: userInput, isBot: false };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
 
-    // Generate response based on simple if/else logic
-    setTimeout(() => {
-      let botResponse = "I'm not sure how to respond to that.";
+    // Add typing indicator
+    const typingMessage = {
+      id: Date.now() + 1,
+      text: "AI Tutor is thinking...",
+      isBot: true,
+      isTyping: true,
+    };
+    setMessages((prev) => [...prev, typingMessage]);
 
-      const userInput = input.toLowerCase();
+    try {
+      // Call the AI tutor API
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: userInput,
+          convHistory: messages
+            .filter((m) => !("isTyping" in m))
+            .map((m) => m.text),
+        }),
+      });
 
-      if (userInput.includes("hello") || userInput.includes("hi")) {
-        botResponse = "Hello there! How are you today?";
-      } else if (userInput.includes("how are you")) {
-        botResponse =
-          "I'm just a simple chatbot, but I'm working well! How about you?";
-      } else if (userInput.includes("help") || userInput.includes("support")) {
-        botResponse =
-          "I can help with basic information. What do you need assistance with?";
-      } else if (userInput.includes("bye") || userInput.includes("goodbye")) {
-        botResponse = "Goodbye! Have a great day!";
-      } else if (userInput.includes("contact")) {
-        botResponse =
-          "You can contact us at support@example.com or call (123) 456-7890.";
-      } else if (userInput.includes("price") || userInput.includes("cost")) {
-        botResponse =
-          "Our basic package starts at $99/month. Premium plans start at $199/month.";
+      if (!response.ok) {
+        throw new Error("Failed to get response");
       }
 
-      const botMessage = { id: Date.now() + 1, text: botResponse, isBot: true };
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
-    }, 500);
+      const data = await response.json();
 
-    setInput("");
+      // Remove typing indicator and add AI response
+      setMessages((prev) => {
+        const withoutTyping = prev.filter((msg) => !("isTyping" in msg));
+        return [
+          ...withoutTyping,
+          {
+            id: Date.now() + 2,
+            text: data.response,
+            isBot: true,
+          },
+        ];
+      });
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+
+      // Remove typing indicator and add error message
+      setMessages((prev) => {
+        const withoutTyping = prev.filter((msg) => !("isTyping" in msg));
+        return [
+          ...withoutTyping,
+          {
+            id: Date.now() + 2,
+            text: "I'm sorry, I'm having trouble connecting right now. Let me try to help with some basic tutoring instead! What subject are you studying?",
+            isBot: true,
+          },
+        ];
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -70,7 +109,7 @@ export default function ChatbotPage() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 w-14 h-14 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors"
+        className="fixed bottom-4 right-4 w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white flex items-center justify-center shadow-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -83,7 +122,8 @@ export default function ChatbotPage() {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
         </svg>
       </button>
     );
@@ -96,12 +136,28 @@ export default function ChatbotPage() {
       } w-80 h-96 bg-white rounded-lg shadow-xl flex flex-col border border-gray-200 overflow-hidden`}
     >
       {/* Header */}
-      <div className="bg-blue-500 text-white px-4 py-3 flex justify-between items-center">
-        <h3 className="font-medium">Chat Support</h3>
+      <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-3 flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <h3 className="font-medium">AI Tutor</h3>
+        </div>
         {!iframeMode && (
           <button
             onClick={() => setIsOpen(false)}
-            className="text-white hover:text-gray-200"
+            className="text-white hover:text-gray-200 transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -134,10 +190,10 @@ export default function ChatbotPage() {
               className={`max-w-[80%] p-3 rounded-lg ${
                 msg.isBot
                   ? "bg-white border border-gray-200 text-gray-800"
-                  : "bg-blue-500 text-white"
+                  : "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
               }`}
             >
-              {msg.text}
+              <div className="whitespace-pre-wrap">{msg.text}</div>
             </div>
           </div>
         ))}
@@ -151,27 +207,52 @@ export default function ChatbotPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Ask me about any subject..."
+            disabled={isLoading}
+            className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-500 disabled:bg-gray-100"
           />
           <button
             onClick={handleSendMessage}
-            className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600"
+            disabled={isLoading || !input.trim()}
+            className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-r-lg hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
+            {isLoading ? (
+              <svg
+                className="animate-spin h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            )}
           </button>
         </div>
       </div>
