@@ -1,163 +1,300 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const systemPrompt = `System Instruction:
-You are ParlayProz Assistant, an expert virtual consultant for the ParlayProz sports betting analytics platform. Your job is to help users understand the ParlayProz system, its features, membership details, affiliate program, betting guidance, and future plans. You provide clear, concise, and helpful explanations, guiding users responsibly and emphasizing data-driven decision-making. You do not provide betting tips yourself but explain how the system works.
+// 🎯 ELITE PROMPT ENGINEERING - Laser-focused system instructions
+const ELITE_SYSTEM_PROMPT = `🎯 ROLE: ParlayProz Virtual Assistant Expert
 
-Here is the ParlayProz System Profile:
+📋 RESPONSE RULES (CRITICAL):
+- MAX 2-3 sentences per response
+- NO fluff, NO repetition, NO unnecessary details
+- Direct answers ONLY
+- Use emojis sparingly (max 1-2 per response)
+- If asked for "more info" then provide detailed explanation
 
-1. Overview
-ParlayProz is the Caribbean's first proprietary sports consultancy service designed to empower bettors with data-driven insights. It features a unique scanner tool that analyzes odds across multiple sportsbooks and compares them with player and team historical performance. This enables users—novice or experienced—to identify high-probability betting opportunities without requiring deep sports knowledge.
+🏆 PARLAYPROZ KNOWLEDGE BASE:
 
-ParlayProz is not a sportsbook and does not accept bets; it provides analytics and actionable information to assist users in making informed wagers on third-party betting platforms.
+💰 PRICING & MEMBERSHIP:
+- Subscription: $100 USD/month
+- Affiliate Commission: $40 USD/month per referral
+- Payment: Cards, USDT (TRC20), Crypto, Bank Transfer (T&T)
+- Cancellation: Anytime before next billing cycle
+- NO free trial available
 
-2. Core Technology: The ParlayProz Scanner
-Functionality: Continuously scans multiple sportsbooks’ odds and cross-references with a robust database of player stats, matchup history, injury reports, and market movements.
+🔥 CORE FEATURES:
+- Scanner Tool: Analyzes odds vs player/team stats across multiple sportsbooks
+- Real-time data updates multiple times daily
+- Color-coded confidence levels (Green=High, Yellow=Moderate, Red=Risky)
+- Works with ALL major sportsbooks (Bet365, DraftKings, FanDuel, etc.)
+- Mobile browser compatible, dedicated app coming soon
 
-Output: Identifies high-value betting picks flagged by confidence scores, color coding, and statistical edge indicators.
+📱 ACCESS & SUPPORT:
+- Login: www.parlayproz.com
+- Support: Live chat, WhatsApp, Email
+- Community: Private WhatsApp group
+- Training: Video tutorials + live Zoom sessions
 
-Update Frequency: Picks refresh multiple times daily based on new data and sports schedules.
+🎯 BETTING STRATEGY:
+- Focus: High-confidence straight bets or 2-4 leg parlays
+- Pre-game analysis only (no live bets currently)
+- Data-driven approach, removes emotion from betting
+- Bankroll management emphasized
 
-Customization: Users can filter picks by sport, bet type (player props, team bets), and odds range.
+🚀 AFFILIATE PROGRAM:
+- Earn $40/month per active referral
+- Paid twice monthly via bank transfer or USDT
+- Must maintain active membership to earn
+- Unique tracking codes provided
 
-Compatibility: Works across all major sportsbooks globally (Bet365, DraftKings, FanDuel, etc.) and is accessible via mobile browsers.
+⚡ RESPONSE EXAMPLES:
+Q: "How much does it cost?"
+A: "ParlayProz membership is $100 USD per month with full access to our scanner, WhatsApp community, and affiliate program. No free trial, but we offer live demos."
 
-3. Membership & Access
-Subscription Cost: $100 USD per month for full access.
+Q: "What is the scanner?"
+A: "Our scanner analyzes odds across multiple sportsbooks and compares them with player/team stats to identify high-value betting opportunities. Updates multiple times daily with color-coded confidence levels."
 
-Included Benefits:
-- Daily updated scanner picks and betting data.
-- Exclusive live support and member training sessions.
-- Access to a private WhatsApp community group.
-- Participation in the ParlayProz affiliate program.
+Q: "How do I sign up?"
+A: "Visit www.parlayproz.com to subscribe for $100/month. Pay with cards, USDT, crypto, or bank transfer, then get login credentials via email."
 
-Payment Options: Credit/debit cards, USDT (TRC20), cryptocurrencies, and local bank transfers (for Trinidad & Tobago residents).
+🛡️ IMPORTANT DISCLAIMERS:
+- ParlayProz provides analytics, NOT betting tips
+- We are NOT a sportsbook, don't accept bets
+- Betting involves risk, no guarantees
+- Past performance doesn't guarantee future results
+- Bet responsibly
 
-Cancellation: Membership can be canceled anytime before the next billing cycle.
+🎯 CONVERSATION STYLE:
+- Professional but friendly
+- Confident in product knowledge
+- Always end with helpful next step or question
+- If user seems interested, guide toward signup or demo`;
 
-No Free Trial: Instead, live demos and daily success stories are provided to demonstrate value.
+// 🧠 ADVANCED CONVERSATION CONTEXT ANALYZER
+function analyzeConversationContext(convHistory) {
+  const recentMessages = convHistory.slice(-6); // Last 3 exchanges
+  const userInterest = {
+    pricing: recentMessages.some(
+      (msg) =>
+        msg.toLowerCase().includes("cost") ||
+        msg.toLowerCase().includes("price") ||
+        msg.toLowerCase().includes("$")
+    ),
+    features: recentMessages.some(
+      (msg) =>
+        msg.toLowerCase().includes("scanner") ||
+        msg.toLowerCase().includes("feature") ||
+        msg.toLowerCase().includes("how")
+    ),
+    signup: recentMessages.some(
+      (msg) =>
+        msg.toLowerCase().includes("sign") ||
+        msg.toLowerCase().includes("join") ||
+        msg.toLowerCase().includes("register")
+    ),
+    affiliate: recentMessages.some(
+      (msg) =>
+        msg.toLowerCase().includes("affiliate") ||
+        msg.toLowerCase().includes("refer") ||
+        msg.toLowerCase().includes("earn")
+    ),
+  };
 
-4. Affiliate Program
-Earn $40 USD monthly commission per referred subscriber.
+  return userInterest;
+}
 
-Commissions paid twice monthly via bank transfer or USDT.
+// 🎯 DYNAMIC PROMPT ENHANCER
+function enhancePromptWithContext(baseQuestion, context, conversationHistory) {
+  let enhancedPrompt = baseQuestion;
 
-Active membership required to earn commissions.
+  // Add context-aware instructions
+  if (context.pricing) {
+    enhancedPrompt +=
+      "\n[CONTEXT: User interested in pricing - be clear about value proposition]";
+  }
 
-Unique affiliate codes used for tracking referrals.
+  if (context.features) {
+    enhancedPrompt +=
+      "\n[CONTEXT: User exploring features - focus on scanner benefits]";
+  }
 
-5. User Experience & Support
-Login & Access: Users log in via www.parlayproz.com using credentials sent after purchase.
+  if (context.signup) {
+    enhancedPrompt +=
+      "\n[CONTEXT: User ready to signup - provide clear next steps]";
+  }
 
-Support Channels: Live chat, WhatsApp messaging, and email.
+  if (context.affiliate) {
+    enhancedPrompt +=
+      "\n[CONTEXT: User interested in earning - highlight affiliate benefits]";
+  }
 
-Community: Private WhatsApp group for daily updates, scanner tips, and shared wins.
+  // If conversation is getting long, remind to be concise
+  if (conversationHistory.length > 8) {
+    enhancedPrompt +=
+      "\n[INSTRUCTION: Keep response under 30 words - user has been chatting a while]";
+  }
 
-Tutorials & Training: Video tutorials on bet building, scanner usage, and live Zoom sessions.
+  return enhancedPrompt;
+}
 
-Mobile Friendly: Fully functional on mobile browsers; dedicated app in development.
-
-6. Betting Guidance & Strategy
-Focus on high-confidence straight bets or parlays of 2–4 legs for balanced risk/reward.
-
-Color-coded picks to indicate confidence levels:
-- Green = High confidence
-- Yellow = Moderate/caution
-- Red = Risky/low-value
-
-No live bets currently; pre-game analysis only.
-
-Users are advised to manage bankroll carefully and bet responsibly.
-
-7. Performance & Risk
-While no system guarantees wins, ParlayProz’s scanner has helped users convert small bets into significant returns.
-
-The scanner removes emotion and guesswork by relying on data and probabilities.
-
-Users must understand betting involves risk, and past success does not guarantee future profits.
-
-8. Technical Details
-Scanner pulls data from sportsbooks and player databases continuously.
-
-Odds and picks update frequently and may change or disappear as games start or odds shift.
-
-Mobile optimized with plans for a dedicated app.
-
-Accessible globally with consideration for regional betting laws.
-
-9. Future Developments
-Adding features like parlay builder integration.
-
-Expanding AI capabilities.
-
-Enhanced notification systems.
-
-Dedicated mobile app launch.
-`;
-
+// 🚀 MAIN API HANDLER - ENGINEERED FOR PERFECTION
 export async function POST(request) {
   try {
-    const { question, convHistory } = await request.json();
+    const { question, convHistory = [] } = await request.json();
 
-    // Check if API key is available
+    // 🔍 Validate input
+    if (!question || question.trim().length === 0) {
+      return Response.json(
+        { error: "Question cannot be empty" },
+        { status: 400 }
+      );
+    }
+
+    // 🔑 API Key validation with detailed logging
     const apiKey = process.env.GOOGLE_AI_API_KEY;
-    console.log("API Key available:", !!apiKey);
 
     if (!apiKey) {
+      console.error(
+        "❌ CRITICAL: Google AI API key is missing from environment variables"
+      );
       return Response.json(
-        {
-          error: "API key is missing. Please check your environment variables.",
-        },
+        { error: "Service temporarily unavailable. Please contact support." },
         { status: 500 }
       );
     }
 
-    // Initialize the Gemini API
+    // 🤖 Initialize Gemini with fallback strategy
     const genAI = new GoogleGenerativeAI(apiKey);
-
-    // Try different model names
     let model;
-    try {
-      model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    } catch (error) {
-      console.error("Error with gemini-1.5-pro:", error);
+
+    const modelPriority = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+
+    for (const modelName of modelPriority) {
       try {
-        model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        model = genAI.getGenerativeModel({ model: modelName });
+        console.log(`✅ Successfully initialized model: ${modelName}`);
+        break;
       } catch (error) {
-        console.error("Error with gemini-pro:", error);
-        try {
-          model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
-        } catch (error) {
-          console.error("Error with gemini-1.0-pro:", error);
-          return Response.json(
-            {
-              error:
-                "Could not initialize any Gemini model. Please check your API key and model availability.",
-            },
-            { status: 500 }
-          );
-        }
+        console.warn(`⚠️ Failed to initialize ${modelName}:`, error.message);
+        continue;
       }
     }
 
-    // Format conversation history
+    if (!model) {
+      console.error("❌ CRITICAL: No Gemini models available");
+      return Response.json(
+        { error: "AI service unavailable. Please try again later." },
+        { status: 503 }
+      );
+    }
+
+    // 🧠 Analyze conversation context for smarter responses
+    const conversationContext = analyzeConversationContext(convHistory);
+
+    // 🎯 Enhance prompt with contextual intelligence
+    const enhancedQuestion = enhancePromptWithContext(
+      question,
+      conversationContext,
+      convHistory
+    );
+
+    // 📝 Format conversation history intelligently
     const formattedHistory = convHistory
-      .map((msg, index) => `${index % 2 === 0 ? "Human" : "Assistant"}: ${msg}`)
+      .slice(-10) // Keep only last 10 messages for efficiency
+      .map((msg, index) => `${index % 2 === 0 ? "User" : "Assistant"}: ${msg}`)
       .join("\n");
 
-    // Create a prompt that includes the system prompt and conversation history
-    const prompt = `${systemPrompt}\n\nConversation history:\n${formattedHistory}\n\nHuman: ${question}\n\nAssistant:`;
+    // 🚀 Construct the ultimate prompt
+    const masterPrompt = `${ELITE_SYSTEM_PROMPT}
 
-    // Generate content directly instead of using chat
-    const result = await model.generateContent(prompt);
+📊 CONVERSATION CONTEXT:
+${formattedHistory}
+
+🎯 CURRENT USER QUESTION: ${enhancedQuestion}
+
+🤖 ASSISTANT RESPONSE (Remember: MAX 2-3 sentences, be helpful and direct):`;
+
+    // ⚡ Generate response with optimized settings
+    console.log("🚀 Generating AI response...");
+    const startTime = Date.now();
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: masterPrompt }] }],
+      generationConfig: {
+        maxOutputTokens: 150, // Limit response length
+        temperature: 0.7, // Balanced creativity
+        topP: 0.8, // Focused responses
+        topK: 40, // Diverse but relevant
+      },
+    });
+
     const response = await result.response;
-    const text = response.text();
+    const aiResponse = response.text().trim();
 
-    return Response.json({ response: text });
+    const responseTime = Date.now() - startTime;
+    console.log(`✅ Response generated in ${responseTime}ms`);
+
+    // 🛡️ Response validation and cleanup
+    if (!aiResponse || aiResponse.length === 0) {
+      return Response.json(
+        {
+          response:
+            "I'm here to help with ParlayProz questions! What would you like to know about our platform?",
+        },
+        { status: 200 }
+      );
+    }
+
+    // 📊 Log successful interaction for analytics
+    console.log(
+      `📊 Successful interaction - Question length: ${question.length}, Response length: ${aiResponse.length}`
+    );
+
+    return Response.json({
+      response: aiResponse,
+      metadata: {
+        responseTime: responseTime,
+        model: model.model || "gemini",
+        contextDetected: Object.keys(conversationContext).filter(
+          (key) => conversationContext[key]
+        ),
+      },
+    });
   } catch (error) {
-    console.error("Error in chat API:", error);
+    // 🚨 Advanced error handling with categorization
+    console.error("❌ API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Categorize error types for better user experience
+    let userMessage =
+      "I'm experiencing technical difficulties. Please try again in a moment.";
+    let statusCode = 500;
+
+    if (error.message.includes("API key")) {
+      userMessage = "Service configuration issue. Please contact support.";
+      statusCode = 503;
+    } else if (
+      error.message.includes("quota") ||
+      error.message.includes("rate limit")
+    ) {
+      userMessage = "High demand right now. Please try again in a few seconds.";
+      statusCode = 429;
+    } else if (
+      error.message.includes("network") ||
+      error.message.includes("timeout")
+    ) {
+      userMessage =
+        "Connection issue. Please check your internet and try again.";
+      statusCode = 502;
+    }
+
     return Response.json(
-      { error: "Failed to process chat request", details: error.message },
-      { status: 500 }
+      {
+        error: userMessage,
+        fallback:
+          "For immediate assistance, contact us via WhatsApp or email support.",
+      },
+      { status: statusCode }
     );
   }
 }
