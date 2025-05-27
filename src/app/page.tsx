@@ -34,14 +34,13 @@ export default function TutorChatbotPage() {
     // Add typing indicator
     const typingMessage = {
       id: Date.now() + 1,
-      text: "AI Tutor is thinking...",
+      text: "Bot is thinking...",
       isBot: true,
       isTyping: true,
     };
     setMessages((prev) => [...prev, typingMessage]);
 
     try {
-      // Call the AI tutor API
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -152,7 +151,7 @@ export default function TutorChatbotPage() {
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
-          <h3 className="font-medium">AI Tutor</h3>
+          <h3 className="font-medium">ParlayProz Assistant</h3>
         </div>
         {!iframeMode && (
           <button
