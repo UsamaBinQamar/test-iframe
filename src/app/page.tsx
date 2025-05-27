@@ -7,7 +7,7 @@ export default function TutorChatbotPage() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi! I'm your AI tutor. I'm here to help you learn! What subject would you like to study today?",
+      text: "Hey there! I’m here to guide you through ParlayProz—your go-to for data-driven sports betting insights. What would you like to know?",
       isBot: true,
     },
   ]);
